@@ -4,7 +4,7 @@ if [[ -n $PASS_SSH ]]
 then
 apt-get install -y ssh
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && (echo $PASS_SSH; echo $PASS_SSH) | passwd root
-service ssh start
+systemctl start ssh
 fi
 mkdir /root/website
 sleep infinity
