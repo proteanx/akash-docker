@@ -1,0 +1,70 @@
+---
+version: "2.0"
+endpoints: 
+ myendpoint:
+   kind: ip
+
+services:
+  app:
+    image: ubuntu:latest 
+    env:
+      - "PASS_SSH=" # Enter Password to connect to the node via SSH (root user).
+    command:
+      - "bash"
+      - "-c"
+    args:
+      - 'apt-get update && apt-get upgrade -y ;
+         apt-get install -y  curl ;
+        curl https://raw.githubusercontent.com/proteanx/akash-docker/main/website/setup.sh | bash'
+    params:
+      storage:
+        data:
+          mount: /root/
+    expose:
+      - port: 80
+        as: 80
+        to:
+          - global: true
+            ip: "myendpoint"
+      - port: 443
+        as: 443
+        to:
+          - global: true
+            ip: "myendpoint"
+      - port: 22
+        as: 22
+        to:
+          - global: true
+            ip: "myendpoint"
+profiles:
+  compute:
+    app:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 2Gi
+        storage:
+          size: 15Gi 
+          - name: data
+            size: 20Gi
+            attributes:
+              persistent: true
+              class: beta3
+  placement:
+    akash: 
+      attributes:
+      ip-lease: true   
+      signedBy:
+        anyOf:
+          - "akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63"
+          - "akash18qa2a2ltfyvkyj0ggj3hkvuj6twzyumuaru9s4"         
+      pricing:
+        app:
+          denom: uakt
+          amount: 10000
+deployment:
+  app:
+    akash:
+      profile: app
+      count: 1 
